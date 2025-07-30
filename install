@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# simple-backup's installer
+install() {
+	cd simple-backup
+  sudo mkdir /etc/simple-backup.d
+  sudo mkdir /usr/local/share/simple-backup
+  sudo mkdir /usr/local/lib/simple-backup
+	sudo cp -f simple-backup.conf /etc/
+  sudo cp -f simple-backup.bin /usr/local/bin/smpbak
+  sudo cp -f .simple-backup/.lib /usr/local/lib/simple-backup/main.sh
+  sudo cp -f simple-backup.src /usr/local/share/simple-backup/smpbak.sh
+  sudo cp -f .simple-backup/help /usr/local/share/simple-backup/help
+  sudo cp -f .simple-backup/version /usr/local/share/simple-backup/version
+  sudo chmod -R 644 /usr/local/share/simple-backup /usr/local/lib/simple-backup
+  sudo chmod 755 /usr/local/bin/smpbak
+}
+
+# Pull down this repo
+git clone https://github.com/CodeKing710/simple-backup
+install "$@"
+rm -rf ./simple-backup

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# simple-backup's main code
+if ! [ "$UID" -eq 0 ]; then
+  echo "You must run this command as sudo!" >&2
+  exit 1
+fi
+
+. /usr/local/lib/simple-backup/*
+
+__simple-backup() {
+	if [ -z "$1" ]; then
+		__args
+	else
+		if echo "$1" | grep -q '-'; then
+			# Arg mode
+			__args "$@"
+		else
+			# Command mode
+			__cmds "$@"
+		fi
+	fi
+	
+  if [ "$RUN" -eq 1 ]; then
+
+}
+
+__simple-backup "$@"
+
+# Cleanup for accidental sourcing
+[ "$$" -eq "$BASHPID" ] && unset __simple-backup __args __cwd autoupdate repo prgroot __loadcfg __cfg error verbose log lists __cmds states

@@ -1,0 +1,142 @@
+#!/bin/sh
+
+# simple-backup's Functions and Variables
+
+# Vars
+__cwd="$(pwd)"
+libroot="/usr/local/lib/simple-backup"
+shareroot="/usr/local/share/simple-backup"
+__folders=''
+
+# Logging function
+# Usage: log [e|v|f]
+log() {
+  error=0
+  while [ -n "$1" ]; do
+    case "$1" in
+      v) [ "$VERBOSE" -eq 1 ] && echo "$2";;
+      e) error=1;;
+      f) echo "[$(date +%YYYY-MM-DD/T%HH:%mm:%ssZ)][$([ "$error" -eq 1 ] && echo "ERROR" || echo "LOG")] $2" > /var/log/simple-backup.log;;
+      *) [ "$error" -eq 1 ] && echo "$2" >&2 || echo "$2";;
+    esac
+    shift
+  done
+}
+
+# Config
+__loadcfg() {
+  # Create local variables
+  directive=''
+  directives='(folders|includes)'
+  properties='(backup-period)'
+
+  # Loop the config file
+	while read -r line; do
+    # Exclude comments
+    if [ "$line" = "" ] || echo "$line" | grep -q '#'; then continue; fi
+    # Capture directives and move to the next line until another directive is selected
+    if echo "$line" | grep -E $directives; then
+      directive=$(grep -E ${directives} | tr -d '[]')
+      log v f "Directive: $directive"
+      continue
+    fi
+    # Check for properties to set right away
+    if echo "$line" | grep -E $properties; then
+      $(echo "$line" | tr -d ' ' | cut -d= -f1)=$(echo "$line" | tr -d ' ' | cut -d= -f2)
+      log v f "Set Property: $(echo "$line" | tr -d ' ' | cut -d= -f1)=$(echo "$line" | tr -d ' ' | cut -d= -f2)"
+      continue
+    fi
+    # Check for directives
+    case "$directive" in
+      includes)
+        __loadcfg "$line"
+      folders)
+        __folders="$__folders$line ";;
+      * )
+        log v f "Directive either not known or not found"
+        ;;
+    esac
+  done <"$1"
+}
+# Config vars will be set via function in-case of needing reloaded
+__loadcfg /etc/simple-backup.conf
+
+# States
+cmds="^(config|verbose|help|version)$"
+CONFIG=0
+VERBOSE=0
+RUN=0
+
+__args() {
+	# Process args
+	[ -z "$1" ] && cat "$shareroot"/help | head -1 && exit
+	while [ -n "$1" ]; do
+		case "${1}" in
+			-C | --config )
+				CONFIG=1
+				;;
+			--reset-cfg )
+				log "Resetting simple-backup to default configuration..."
+				cp -rf "$shareroot/default.conf" "/etc/simple-backup.conf"
+				exit;;
+			-V | --verbose )
+				VERBOSE=1
+				;;
+			-\? | --help )
+				# Not using -h to leave it open for other possible args
+				cat "$shareroot/help"
+				exit;;
+			-v | --version )
+				cat "$shareroot/version"
+				exit;;
+			* )
+				# Catch-all
+				# Change the line below to the commented one to be legacy compliant
+				if [[ "$1" =~ ${cmds} ]]; then
+					__cmds "$1"
+					return 0
+				else
+					cat "$shareroot/help" | head -1
+					error "'$1' is not an argument!"
+					exit
+				fi
+				;;
+		esac
+	shift; done
+}
+__cmds() {
+	# Process commands
+	[ -z "$1" ] && cat "$shareroot"/help | head -1 && exit
+	while [ -n "$1" ]; do
+		case "$1" in
+      run)
+        RUN=1
+        ;;
+			config )
+				CONFIG=1
+				;;
+			verbose )
+				VERBOSE=1
+				;;
+			help )
+				cat "$shareroot/help"
+				exit;;
+			version )
+				cat "$shareroot/version"
+				exit;;
+			* )
+				# Catch-all
+				if [[ "$1" =~ ^- ]]; then
+					__args "$1"
+					return 0
+				else
+					# Adjust the section '${lists[cmds]}' to '${cmds}' if you want to be legacy compliant
+					verbose "Grepped command: '$(echo "${cmds}" | sed -e 's/\^\|[\(]\|[\)]\|\$//g' -e 's/[\|]/\n/g' | grep "$1")'"
+					error "'$1' is not a command!"
+					error "Did you mean to use '$(echo "${cmds}" | sed -e 's/\^\|[\(]\|[\)]\|\$//g' -e 's/[\|]/\n/g' | grep "$1")'?"
+					exit
+				fi
+				;;
+		esac
+	shift; done
+}
