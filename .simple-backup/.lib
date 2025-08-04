@@ -36,7 +36,7 @@ __loadcfg() {
     if [ "$line" = "" ] || echo "$line" | grep -q '#'; then continue; fi
     # Capture directives and move to the next line until another directive is selected
     if echo "$line" | grep -E $directives; then
-      directive=$(grep -E ${directives} | tr -d '[]')
+      directive=$(grep -E $directives | tr -d '[]')
       log v f "Directive: $directive"
       continue
     fi
@@ -49,7 +49,7 @@ __loadcfg() {
     # Check for directives
     case "$directive" in
       includes)
-        __loadcfg "$line"
+        __loadcfg "$line";;
       folders)
         __folders="$__folders$line ";;
       * )
