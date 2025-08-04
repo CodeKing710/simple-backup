@@ -8,16 +8,22 @@ libroot="/usr/local/lib/simple-backup"
 shareroot="/usr/local/share/simple-backup"
 __folders=''
 
+# States
+cmds="^(config|verbose|help|version)$"
+CONFIG=0
+VERBOSE=0
+RUN=0
+
 # Logging function
 # Usage: log [e|v|f]
 log() {
   error=0
   while [ -n "$1" ]; do
     case "$1" in
-      v) [ "$VERBOSE" -eq 1 ] && echo "$2";;
+      v) [ $VERBOSE -eq 1 ] && echo "$2";;
       e) error=1;;
       f) echo "[$(date +%YYYY-MM-DD/T%HH:%mm:%ssZ)][$([ "$error" -eq 1 ] && echo "ERROR" || echo "LOG")] $2" > /var/log/simple-backup.log;;
-      *) [ "$error" -eq 1 ] && echo "$2" >&2 || echo "$2";;
+      *) [ $error -eq 1 ] && echo "$2" >&2 || echo "$2";;
     esac
     shift
   done
@@ -62,12 +68,6 @@ __loadcfg() {
 # Config vars will be set via function in-case of needing reloaded
 __loadcfg /etc/simple-backup.conf
 
-# States
-cmds="^(config|verbose|help|version)$"
-CONFIG=0
-VERBOSE=0
-RUN=0
-
 __args() {
 	# Process args
 	[ -z "$1" ] && cat "$shareroot"/help | head -1 && exit
@@ -98,7 +98,7 @@ __args() {
 					return 0
 				else
 					cat "$shareroot/help" | head -1
-					error "'$1' is not an argument!"
+					log e "'$1' is not an argument!"
 					exit
 				fi
 				;;
@@ -135,9 +135,9 @@ __cmds() {
 					return 0
 				else
 					# Adjust the section '${lists[cmds]}' to '${cmds}' if you want to be legacy compliant
-					verbose "Grepped command: '$(echo "${cmds}" | sed -e 's/\^\|[\(]\|[\)]\|\$//g' -e 's/[\|]/\n/g' | grep "$1")'"
-					error "'$1' is not a command!"
-					error "Did you mean to use '$(echo "${cmds}" | sed -e 's/\^\|[\(]\|[\)]\|\$//g' -e 's/[\|]/\n/g' | grep "$1")'?"
+					log v "Grepped command: '$(echo "${cmds}" | sed -e 's/\^\|[\(]\|[\)]\|\$//g' -e 's/[\|]/\n/g' | grep "$1")'"
+					log e "'$1' is not a command!"
+					log e "Did you mean to use '$(echo "${cmds}" | sed -e 's/\^\|[\(]\|[\)]\|\$//g' -e 's/[\|]/\n/g' | grep "$1")'?"
 					exit
 				fi
 				;;
