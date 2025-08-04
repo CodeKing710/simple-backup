@@ -28,6 +28,7 @@ install() {
   sudo chmod 755 /usr/local/bin/smpbak
   echo "Applied user permissions"
   echo "Install complete!"
+  cd ../
 }
 
 # Pull down this repo
