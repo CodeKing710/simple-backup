@@ -6,7 +6,7 @@ if ! [ "$UID" -eq 0 ]; then
   exit 1
 fi
 
-trap "kill $(cat $shareroot/backup_batch.pid); rm -f $shareroot/backup_batch.pid" TERM EXIT
+trap "if [ -e $shareroot/backup_batch.pid ]; then kill $(cat $shareroot/backup_batch.pid); rm -f $shareroot/backup_batch.pid; fi" TERM EXIT
 trap "__simple-backup stop; __simple-backup run" HUP
 
 . /usr/local/lib/simple-backup/*
@@ -24,7 +24,7 @@ __simple-backup() {
 		fi
 	fi
 	
-  if [ "$RUN" -eq 1 ]; then
+  if [ $RUN -eq 1 ]; then
     # Daemon-mode
     (
       for folder in $__folders; do
@@ -34,7 +34,7 @@ __simple-backup() {
     ) &
     echo "$!" > "$shareroot/backup_batch.pid"
   fi
-  if [ "$STOP" -eq 1 ]; then
+  if [ $STOP -eq 1 ]; then
     # Kill batch job
     log v f "Stopping batch job for backups"
     kill "$(cat "$shareroot/backup_batch.pid")"

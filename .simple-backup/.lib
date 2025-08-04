@@ -13,6 +13,7 @@ cmds="^(config|verbose|help|version)$"
 CONFIG=0
 VERBOSE=0
 RUN=0
+STOP=0
 
 # Logging function
 # Usage: log [e|v|f]
