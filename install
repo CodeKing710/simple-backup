@@ -32,6 +32,6 @@ install() {
 }
 
 # Pull down this repo
-git clone https://github.com/CodeKing710/simple-backup
+git clone https://github.com/CodeKing710/simple-backup 2>&1 >/dev/null
 install "$@"
 rm -rf ./simple-backup
