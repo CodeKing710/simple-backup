@@ -42,7 +42,7 @@ __loadcfg() {
     fi
     # Check for properties to set right away
     if echo "$line" | grep -E $properties; then
-      $(echo "$line" | tr -d ' ' | cut -d= -f1)=$(echo "$line" | tr -d ' ' | cut -d= -f2)
+      $(echo "$line" | tr -d ' ' | cut -d= -f1)="$(echo "$line" | tr -d ' ' | cut -d= -f2)"
       log v f "Set Property: $(echo "$line" | tr -d ' ' | cut -d= -f1)=$(echo "$line" | tr -d ' ' | cut -d= -f2)"
       continue
     fi
@@ -57,6 +57,7 @@ __loadcfg() {
         ;;
     esac
   done <"$1"
+  __folders="$(echo "$__folders" | sed 's/ $//')"
 }
 # Config vars will be set via function in-case of needing reloaded
 __loadcfg /etc/simple-backup.conf
@@ -112,6 +113,9 @@ __cmds() {
       run)
         RUN=1
         ;;
+      stop)
+        STOP=1
+        ;;
 			config )
 				CONFIG=1
 				;;
@@ -139,4 +143,26 @@ __cmds() {
 				;;
 		esac
 	shift; done
+}
+__job() {
+  while true; do
+    cp -r "$1" "$backupTo/"
+    sleep $(__toMs $backupPeriod)
+  done
+}
+__next_year_leap_year_days() {
+  year="$1"
+  year="$((year+1))"
+  date -d "Feb 29 $year" >/dev/null 2>&1 && return 366 || return 365
+}
+__toMs() {
+  case "$1" in
+    *s) echo "$((1000))";;
+    *m) echo "$((1000*60))";;
+    *h) echo "$((1000*60*60))";;
+    *d) echo "$((1000*60*60*24))";;
+    *w) echo "$((1000*60*60*24*7))";;
+    *y) echo "$((1000*60*60*24*$(__next_year_leap_year_days $(date +%Y))))";;
+    *) echo "$1";;
+  esac
 }

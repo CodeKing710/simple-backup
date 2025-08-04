@@ -3,17 +3,31 @@
 # simple-backup's installer
 install() {
 	cd simple-backup
+  echo "Creating Directories..."
   sudo mkdir /etc/simple-backup.d
+  echo "Made /etc entry"
   sudo mkdir /usr/local/share/simple-backup
+  echo "Made /usr/local/share entry"
   sudo mkdir /usr/local/lib/simple-backup
+  echo "Made /usr/local/lib entry"
+  sudo mkdir /.backups
+  echo "Made backup root at /.backups"
+  echo "Copying simple-backup binaries to repsective locations..."
 	sudo cp -f simple-backup.conf /etc/
+  echo "Copied config"
   sudo cp -f simple-backup.bin /usr/local/bin/smpbak
   sudo cp -f .simple-backup/.lib /usr/local/lib/simple-backup/main.sh
+  echo "Copied binaries"
   sudo cp -f simple-backup.src /usr/local/share/simple-backup/smpbak.sh
+  echo "Copied source"
   sudo cp -f .simple-backup/help /usr/local/share/simple-backup/help
   sudo cp -f .simple-backup/version /usr/local/share/simple-backup/version
+  echo "Copied /usr/local/share resources"
+  echo "Applying proper user permissions..."
   sudo chmod -R 644 /usr/local/share/simple-backup /usr/local/lib/simple-backup
   sudo chmod 755 /usr/local/bin/smpbak
+  echo "Applied user permissions"
+  echo "Install complete!"
 }
 
 # Pull down this repo

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# simple-backup's installer
+uninstall() {
+	cd simple-backup
+  echo "Removing Directories..."
+  sudo rm -rf /etc/simple-backup.d
+  sudo rm -rf /usr/local/share/simple-backup
+  sudo rm -rf /usr/local/lib/simple-backup
+  sudo rm -rf /.backups
+  echo "Removed directories"
+  echo "Removing simple-backup binaries to repsective locations..."
+	sudo rm -f /etc/simple-backup.conf
+  sudo rm -f /usr/local/bin/smpbak
+  sudo rm -f /usr/local/lib/simple-backup/main.sh
+  sudo rm -f /usr/local/share/simple-backup/smpbak.sh
+  sudo rm -f /usr/local/share/simple-backup/help
+  sudo rm -f /usr/local/share/simple-backup/version
+  echo "Removed binaries and share"
+  echo "Uninstall complete!"
+}
+
+uninstall "$@"
