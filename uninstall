@@ -2,7 +2,6 @@
 
 # simple-backup's installer
 uninstall() {
-	cd simple-backup
   echo "Removing Directories..."
   sudo rm -rf /etc/simple-backup.d
   sudo rm -rf /usr/local/share/simple-backup
