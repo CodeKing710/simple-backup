@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # simple-backup's main code
 if ! [ "$UID" -eq 0 ]; then
