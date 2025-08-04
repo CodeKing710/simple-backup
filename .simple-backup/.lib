@@ -146,6 +146,7 @@ __cmds() {
 }
 __job() {
   while true; do
+    log v f "Backing up contents of $1 to $backupTo/$1"
     cp -r "$1" "$backupTo/"
     sleep $(__toMs $backupPeriod)
   done

@@ -28,6 +28,7 @@ __simple-backup() {
     # Daemon-mode
     (
       for folder in $__folders; do
+        log v f "Creating job for $folder on $backupPeriod interval"
         __job "$folder" &
       done
     ) &
@@ -35,6 +36,7 @@ __simple-backup() {
   fi
   if [ "$STOP" -eq 1 ]; then
     # Kill batch job
+    log v f "Stopping batch job for backups"
     kill "$(cat "$shareroot/backup_batch.pid")"
     rm -f "$shareroot/backup_batch.pid"
   fi
